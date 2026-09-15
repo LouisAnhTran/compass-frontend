@@ -7,3 +7,7 @@ node_modules/
 dist/
 .vite/
 .DS_Store
+
+# Playwright output
+shots/
+test-results/

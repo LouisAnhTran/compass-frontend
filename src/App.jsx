@@ -146,7 +146,9 @@ function Chat({ onLogout }) {
 
   function startNew() {
     setThreadId(newThreadId()); setMessages([]); setAwaiting(null)
-    setResults(null); setError(null)
+    // setQuery too: unsent composer text belongs to the conversation you just
+    // left, so carrying it into a fresh thread is a surprise.
+    setResults(null); setError(null); setQuery('')
   }
 
   return (
