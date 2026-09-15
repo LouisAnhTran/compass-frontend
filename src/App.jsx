@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import {
-  Compass, LogOut, Plus, Search, Loader2, Moon, Sun, FileText, AlertCircle,
+  Compass, LogOut, Plus, Search, Loader2, Moon, Sun, FileText, AlertCircle, User,
 } from 'lucide-react'
 import { login, api } from './api.js'
 import HitlPrompt from './HitlPrompt.jsx'
@@ -265,22 +265,43 @@ function Sidebar({ conversations, threadId, onOpen, onNew, onLogout }) {
 
 function Message({ msg }) {
   const content = typeof msg === 'string' ? msg : (msg.content ?? '')
-  // Assistant turns are the short confirmations the HITL nodes append
-  // ("Model: …", "Queues: …"), so they read as a trail of resolved filters.
-  const isUser = (msg.type ?? msg.role) === 'human' || (msg.type ?? msg.role) === 'user'
+  // The backend normalises both endpoints to {role, content}; `type` is the
+  // raw LangChain field, kept as a fallback.
+  const role = msg.role ?? msg.type
+  const isUser = role === 'human' || role === 'user'
 
-  if (isUser) {
-    return (
-      <div className="self-end max-w-[70%] bg-dark-accent text-white text-sm rounded-2xl rounded-br-sm px-4 py-2.5">
-        {content}
-      </div>
-    )
-  }
+  // Alignment alone was ambiguous once the agent started asking questions —
+  // "Which queues?" and "Any queue" are both short and sit close together.
+  // self-end stays on the outer element so the e2e harness can still key on it.
   return (
-    <div className="self-start max-w-[70%] text-sm text-dark-muted flex items-center gap-2">
-      <span className="w-1 h-1 rounded-full bg-dark-muted flex-shrink-0" />
-      {content}
+    <div className={`flex items-start gap-2.5 max-w-[78%] animate-fade-in
+                     ${isUser ? 'self-end flex-row-reverse' : 'self-start'}`}>
+      <Avatar isUser={isUser} />
+      {isUser ? (
+        <div className="bg-dark-accent text-white text-sm rounded-2xl rounded-tr-sm px-4 py-2.5">
+          {content}
+        </div>
+      ) : (
+        <div className="bg-dark-surface border border-dark-border text-sm text-dark-text
+                        rounded-2xl rounded-tl-sm px-4 py-2.5">
+          {content}
+        </div>
+      )}
     </div>
+  )
+}
+
+function Avatar({ isUser }) {
+  return (
+    /* Solid fills on both: a 10%-alpha accent on white rendered as an almost
+       invisible circle, which defeats the point of the marker. */
+    <span title={isUser ? 'You' : 'Compass'}
+          className={`flex-shrink-0 grid place-items-center w-7 h-7 rounded-full mt-0.5
+                      ${isUser
+                        ? 'bg-dark-accent text-white'
+                        : 'bg-dark-surface border border-dark-border text-dark-accent'}`}>
+      {isUser ? <User size={14} /> : <Compass size={14} />}
+    </span>
   )
 }
 
