@@ -81,6 +81,11 @@ function Item({ item, allOptions, selected, onToggle }) {
               </li>
             ))}
           </ul>
+          {item.total_above_threshold > item.matches.length && (
+            <p className="muted">
+              Showing {item.matches.length} of {item.total_above_threshold} matches.
+            </p>
+          )}
           <button className="ghost" onClick={() => setBrowsing(true)}>Browse all…</button>
         </>
       )}
